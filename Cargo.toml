@@ -2,6 +2,12 @@
 name = "cstl-sys"
 version = "0.1.0"
 edition = "2021"
+authors = ["Dasaav"]
+description = "Low level CSTL Rust bindings generated with bindgen"
+readme = "README.md"
+repository = "https://github.com/Dasaav-dsv/cstl-sys"
+license = "MIT OR Apache-2.0"
+links = "CSTL"
 
 [build-dependencies]
 cc = "1.2"
