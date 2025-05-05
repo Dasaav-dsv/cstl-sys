@@ -547,7 +547,6 @@ unsafe extern "C" {
 }
 #[doc = " STL ABI `std::vector` layout.\n\n Does not include the allocator, which nonetheless is a part of the `std::vector`\n structure! You are responsible for including it, since it can take on any form.\n\n Do not manipulate the members directly, use the associated functions!\n"]
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
 pub struct CSTL_VectorVal {
     pub first: *mut ::std::os::raw::c_void,
     pub last: *mut ::std::os::raw::c_void,
@@ -856,7 +855,6 @@ unsafe extern "C" {
 }
 #[doc = " STL ABI `std::basic_string` layout.\n\n Does not include the allocator, which nonetheless is a part of the `std::basic_string`\n structure! You are responsible for including it, since it can take on any form.\n\n Do not manipulate the members directly, use the associated functions!\n"]
 #[repr(C)]
-#[derive(Copy, Clone)]
 pub struct CSTL_StringVal {
     pub bx: CSTL_StringVal__bindgen_ty_1,
     pub size: usize,
@@ -1463,7 +1461,6 @@ unsafe extern "C" {
 }
 #[doc = " STL ABI `std::basic_string` layout.\n\n Does not include the allocator, which nonetheless is a part of the `std::basic_string`\n structure! You are responsible for including it, since it can take on any form.\n\n Do not manipulate the members directly, use the associated functions!\n"]
 #[repr(C)]
-#[derive(Copy, Clone)]
 pub struct CSTL_WideStringVal {
     pub bx: CSTL_WideStringVal__bindgen_ty_1,
     pub size: usize,
@@ -2064,7 +2061,6 @@ pub type char32_t = ::std::os::raw::c_uint;
 pub type char8_t = ::std::os::raw::c_uchar;
 #[doc = " STL ABI `std::basic_string` layout.\n\n Does not include the allocator, which nonetheless is a part of the `std::basic_string`\n structure! You are responsible for including it, since it can take on any form.\n\n Do not manipulate the members directly, use the associated functions!\n"]
 #[repr(C)]
-#[derive(Copy, Clone)]
 pub struct CSTL_UTF8StringVal {
     pub bx: CSTL_UTF8StringVal__bindgen_ty_1,
     pub size: usize,
@@ -2668,7 +2664,6 @@ unsafe extern "C" {
 }
 #[doc = " STL ABI `std::basic_string` layout.\n\n Does not include the allocator, which nonetheless is a part of the `std::basic_string`\n structure! You are responsible for including it, since it can take on any form.\n\n Do not manipulate the members directly, use the associated functions!\n"]
 #[repr(C)]
-#[derive(Copy, Clone)]
 pub struct CSTL_UTF16StringVal {
     pub bx: CSTL_UTF16StringVal__bindgen_ty_1,
     pub size: usize,
@@ -3278,7 +3273,6 @@ unsafe extern "C" {
 }
 #[doc = " STL ABI `std::basic_string` layout.\n\n Does not include the allocator, which nonetheless is a part of the `std::basic_string`\n structure! You are responsible for including it, since it can take on any form.\n\n Do not manipulate the members directly, use the associated functions!\n"]
 #[repr(C)]
-#[derive(Copy, Clone)]
 pub struct CSTL_UTF32StringVal {
     pub bx: CSTL_UTF32StringVal__bindgen_ty_1,
     pub size: usize,
