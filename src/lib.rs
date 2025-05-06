@@ -4,143 +4,6 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 
-#[repr(C)]
-#[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct __BindgenBitfieldUnit<Storage> {
-    storage: Storage,
-}
-impl<Storage> __BindgenBitfieldUnit<Storage> {
-    #[inline]
-    pub const fn new(storage: Storage) -> Self {
-        Self { storage }
-    }
-}
-impl<Storage> __BindgenBitfieldUnit<Storage>
-where
-    Storage: AsRef<[u8]> + AsMut<[u8]>,
-{
-    #[inline]
-    fn extract_bit(byte: u8, index: usize) -> bool {
-        let bit_index = if cfg!(target_endian = "big") {
-            7 - (index % 8)
-        } else {
-            index % 8
-        };
-        let mask = 1 << bit_index;
-        byte & mask == mask
-    }
-    #[inline]
-    pub fn get_bit(&self, index: usize) -> bool {
-        debug_assert!(index / 8 < self.storage.as_ref().len());
-        let byte_index = index / 8;
-        let byte = self.storage.as_ref()[byte_index];
-        Self::extract_bit(byte, index)
-    }
-    #[inline]
-    pub unsafe fn raw_get_bit(this: *const Self, index: usize) -> bool {
-        debug_assert!(index / 8 < core::mem::size_of::<Storage>());
-        let byte_index = index / 8;
-        let byte = *(core::ptr::addr_of!((*this).storage) as *const u8).offset(byte_index as isize);
-        Self::extract_bit(byte, index)
-    }
-    #[inline]
-    fn change_bit(byte: u8, index: usize, val: bool) -> u8 {
-        let bit_index = if cfg!(target_endian = "big") {
-            7 - (index % 8)
-        } else {
-            index % 8
-        };
-        let mask = 1 << bit_index;
-        if val {
-            byte | mask
-        } else {
-            byte & !mask
-        }
-    }
-    #[inline]
-    pub fn set_bit(&mut self, index: usize, val: bool) {
-        debug_assert!(index / 8 < self.storage.as_ref().len());
-        let byte_index = index / 8;
-        let byte = &mut self.storage.as_mut()[byte_index];
-        *byte = Self::change_bit(*byte, index, val);
-    }
-    #[inline]
-    pub unsafe fn raw_set_bit(this: *mut Self, index: usize, val: bool) {
-        debug_assert!(index / 8 < core::mem::size_of::<Storage>());
-        let byte_index = index / 8;
-        let byte =
-            (core::ptr::addr_of_mut!((*this).storage) as *mut u8).offset(byte_index as isize);
-        *byte = Self::change_bit(*byte, index, val);
-    }
-    #[inline]
-    pub fn get(&self, bit_offset: usize, bit_width: u8) -> u64 {
-        debug_assert!(bit_width <= 64);
-        debug_assert!(bit_offset / 8 < self.storage.as_ref().len());
-        debug_assert!((bit_offset + (bit_width as usize)) / 8 <= self.storage.as_ref().len());
-        let mut val = 0;
-        for i in 0..(bit_width as usize) {
-            if self.get_bit(i + bit_offset) {
-                let index = if cfg!(target_endian = "big") {
-                    bit_width as usize - 1 - i
-                } else {
-                    i
-                };
-                val |= 1 << index;
-            }
-        }
-        val
-    }
-    #[inline]
-    pub unsafe fn raw_get(this: *const Self, bit_offset: usize, bit_width: u8) -> u64 {
-        debug_assert!(bit_width <= 64);
-        debug_assert!(bit_offset / 8 < core::mem::size_of::<Storage>());
-        debug_assert!((bit_offset + (bit_width as usize)) / 8 <= core::mem::size_of::<Storage>());
-        let mut val = 0;
-        for i in 0..(bit_width as usize) {
-            if Self::raw_get_bit(this, i + bit_offset) {
-                let index = if cfg!(target_endian = "big") {
-                    bit_width as usize - 1 - i
-                } else {
-                    i
-                };
-                val |= 1 << index;
-            }
-        }
-        val
-    }
-    #[inline]
-    pub fn set(&mut self, bit_offset: usize, bit_width: u8, val: u64) {
-        debug_assert!(bit_width <= 64);
-        debug_assert!(bit_offset / 8 < self.storage.as_ref().len());
-        debug_assert!((bit_offset + (bit_width as usize)) / 8 <= self.storage.as_ref().len());
-        for i in 0..(bit_width as usize) {
-            let mask = 1 << i;
-            let val_bit_is_set = val & mask == mask;
-            let index = if cfg!(target_endian = "big") {
-                bit_width as usize - 1 - i
-            } else {
-                i
-            };
-            self.set_bit(index + bit_offset, val_bit_is_set);
-        }
-    }
-    #[inline]
-    pub unsafe fn raw_set(this: *mut Self, bit_offset: usize, bit_width: u8, val: u64) {
-        debug_assert!(bit_width <= 64);
-        debug_assert!(bit_offset / 8 < core::mem::size_of::<Storage>());
-        debug_assert!((bit_offset + (bit_width as usize)) / 8 <= core::mem::size_of::<Storage>());
-        for i in 0..(bit_width as usize) {
-            let mask = 1 << i;
-            let val_bit_is_set = val & mask == mask;
-            let index = if cfg!(target_endian = "big") {
-                bit_width as usize - 1 - i
-            } else {
-                i
-            };
-            Self::raw_set_bit(this, index + bit_offset, val_bit_is_set);
-        }
-    }
-}
 pub type wchar_t = ::std::os::raw::c_ushort;
 #[doc = " Opaque memory allocator interface.\n\n The caller is responsible for making sure an allocator owns and is compatible\n for freeing memory of a given container.\n\n `aligned_alloc` and `aligned_free` must not be null, while `allocator` can\n be used to pass any opaque data (if any) directly to the bound functions.\n\n A strict alignment requirement may be imposed by allocated types.\n"]
 #[repr(C)]
@@ -186,11 +49,13 @@ pub struct CSTL_Type {
     pub size_rcp: usize,
     #[doc = " Right shift of the fixed point reciprocal of the type's size,\n used for fast division and remainder operations.\n\n Calculated automatically by `CSTL_define_*_type`.\n"]
     pub size_rcp_sh: u8,
-    pub _bitfield_align_1: [u8; 0],
-    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize]>,
+    #[doc = " Natural alignment of the type in bytes (log2).\n\n Calculated automatically by `CSTL_define_*_type`.\n"]
+    pub align_lg: u8,
+    #[doc = " Determines whether `move_from` can be called on a `void*` pointer\n to an object of this type.\n\n Set by `CSTL_define_*_type` or manually.\n"]
+    pub use_move_from: u8,
     #[doc = " Opaque bitfield with unstable ABI.\n"]
-    pub internal_flags: u16,
-    #[doc = " Bound copy constructor function.\n\n It is NOT permitted to mutate the `source`.\n\n If null a `memcpy(new_instance, src, size)` will be used in its stead.\n"]
+    pub internal_flags: u8,
+    #[doc = " Bound copy constructor function.\n\n It is NOT permitted to mutate the `source`.\n\n If null a `memmove(new_instance, src, size)` will be used in its stead.\n"]
     pub copy_from: ::std::option::Option<
         unsafe extern "C" fn(
             new_instance: *mut ::std::os::raw::c_void,
@@ -215,136 +80,17 @@ const _: () = {
     ["Offset of field: CSTL_Type::size_rcp"][::std::mem::offset_of!(CSTL_Type, size_rcp) - 8usize];
     ["Offset of field: CSTL_Type::size_rcp_sh"]
         [::std::mem::offset_of!(CSTL_Type, size_rcp_sh) - 16usize];
+    ["Offset of field: CSTL_Type::align_lg"][::std::mem::offset_of!(CSTL_Type, align_lg) - 17usize];
+    ["Offset of field: CSTL_Type::use_move_from"]
+        [::std::mem::offset_of!(CSTL_Type, use_move_from) - 18usize];
     ["Offset of field: CSTL_Type::internal_flags"]
-        [::std::mem::offset_of!(CSTL_Type, internal_flags) - 18usize];
+        [::std::mem::offset_of!(CSTL_Type, internal_flags) - 19usize];
     ["Offset of field: CSTL_Type::copy_from"]
         [::std::mem::offset_of!(CSTL_Type, copy_from) - 24usize];
     ["Offset of field: CSTL_Type::move_from"]
         [::std::mem::offset_of!(CSTL_Type, move_from) - 32usize];
     ["Offset of field: CSTL_Type::destroy"][::std::mem::offset_of!(CSTL_Type, destroy) - 40usize];
 };
-impl CSTL_Type {
-    #[inline]
-    pub fn align_lg(&self) -> u8 {
-        unsafe { ::std::mem::transmute(self._bitfield_1.get(0usize, 6u8) as u8) }
-    }
-    #[inline]
-    pub fn set_align_lg(&mut self, val: u8) {
-        unsafe {
-            let val: u8 = ::std::mem::transmute(val);
-            self._bitfield_1.set(0usize, 6u8, val as u64)
-        }
-    }
-    #[inline]
-    pub unsafe fn align_lg_raw(this: *const Self) -> u8 {
-        unsafe {
-            ::std::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
-                ::std::ptr::addr_of!((*this)._bitfield_1),
-                0usize,
-                6u8,
-            ) as u8)
-        }
-    }
-    #[inline]
-    pub unsafe fn set_align_lg_raw(this: *mut Self, val: u8) {
-        unsafe {
-            let val: u8 = ::std::mem::transmute(val);
-            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
-                ::std::ptr::addr_of_mut!((*this)._bitfield_1),
-                0usize,
-                6u8,
-                val as u64,
-            )
-        }
-    }
-    #[inline]
-    pub fn use_copy_from(&self) -> u8 {
-        unsafe { ::std::mem::transmute(self._bitfield_1.get(6usize, 1u8) as u8) }
-    }
-    #[inline]
-    pub fn set_use_copy_from(&mut self, val: u8) {
-        unsafe {
-            let val: u8 = ::std::mem::transmute(val);
-            self._bitfield_1.set(6usize, 1u8, val as u64)
-        }
-    }
-    #[inline]
-    pub unsafe fn use_copy_from_raw(this: *const Self) -> u8 {
-        unsafe {
-            ::std::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
-                ::std::ptr::addr_of!((*this)._bitfield_1),
-                6usize,
-                1u8,
-            ) as u8)
-        }
-    }
-    #[inline]
-    pub unsafe fn set_use_copy_from_raw(this: *mut Self, val: u8) {
-        unsafe {
-            let val: u8 = ::std::mem::transmute(val);
-            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
-                ::std::ptr::addr_of_mut!((*this)._bitfield_1),
-                6usize,
-                1u8,
-                val as u64,
-            )
-        }
-    }
-    #[inline]
-    pub fn use_move_from(&self) -> u8 {
-        unsafe { ::std::mem::transmute(self._bitfield_1.get(7usize, 1u8) as u8) }
-    }
-    #[inline]
-    pub fn set_use_move_from(&mut self, val: u8) {
-        unsafe {
-            let val: u8 = ::std::mem::transmute(val);
-            self._bitfield_1.set(7usize, 1u8, val as u64)
-        }
-    }
-    #[inline]
-    pub unsafe fn use_move_from_raw(this: *const Self) -> u8 {
-        unsafe {
-            ::std::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
-                ::std::ptr::addr_of!((*this)._bitfield_1),
-                7usize,
-                1u8,
-            ) as u8)
-        }
-    }
-    #[inline]
-    pub unsafe fn set_use_move_from_raw(this: *mut Self, val: u8) {
-        unsafe {
-            let val: u8 = ::std::mem::transmute(val);
-            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
-                ::std::ptr::addr_of_mut!((*this)._bitfield_1),
-                7usize,
-                1u8,
-                val as u64,
-            )
-        }
-    }
-    #[inline]
-    pub fn new_bitfield_1(
-        align_lg: u8,
-        use_copy_from: u8,
-        use_move_from: u8,
-    ) -> __BindgenBitfieldUnit<[u8; 1usize]> {
-        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 1usize]> = Default::default();
-        __bindgen_bitfield_unit.set(0usize, 6u8, {
-            let align_lg: u8 = unsafe { ::std::mem::transmute(align_lg) };
-            align_lg as u64
-        });
-        __bindgen_bitfield_unit.set(6usize, 1u8, {
-            let use_copy_from: u8 = unsafe { ::std::mem::transmute(use_copy_from) };
-            use_copy_from as u64
-        });
-        __bindgen_bitfield_unit.set(7usize, 1u8, {
-            let use_move_from: u8 = unsafe { ::std::mem::transmute(use_move_from) };
-            use_move_from as u64
-        });
-        __bindgen_bitfield_unit
-    }
-}
 #[doc = " Reference to a mutable `CSTL_TypeRef`.\n\n Must not be null.\n"]
 pub type CSTL_TypeRef = *mut CSTL_Type;
 #[doc = " Reference to a const `CSTL_TypeRef`.\n\n Must not be null.\n"]
