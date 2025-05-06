@@ -1,6 +1,6 @@
 [package]
 name = "cstl-sys"
-version = "0.1.1"
+version = "1.0.0"
 edition = "2021"
 authors = ["Dasaav"]
 description = "Low level CSTL Rust bindings generated with bindgen"
