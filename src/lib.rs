@@ -39,257 +39,151 @@ const _: () = {
     ["Offset of field: CSTL_Alloc::aligned_free"]
         [::std::mem::offset_of!(CSTL_Alloc, aligned_free) - 16usize];
 };
-#[doc = " Basic type info used in place of a type template parameter.\n\n Two `CSTL_Type` instances are compatible iff their size and alignment\n are equal and the bound functions can operate interchangeably.\n\n It is a logic error to use incompatible `CSTL_Type` instances one\n after another when manipulating an object.\n"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct CSTL_Type {
-    #[doc = " Size of the type in bytes, including any padding bytes.\n\n Must be a non-zero multiple of `1 << align_lg`.\n"]
-    pub size: usize,
-    #[doc = " Fixed point reciprocal of the type's size, used for\n fast division and remainder operations.\n\n Calculated automatically by `CSTL_define_*_type`.\n"]
-    pub size_rcp: usize,
-    #[doc = " Right shift of the fixed point reciprocal of the type's size,\n used for fast division and remainder operations.\n\n Calculated automatically by `CSTL_define_*_type`.\n"]
-    pub size_rcp_sh: u8,
-    #[doc = " Natural alignment of the type in bytes (log2).\n\n Calculated automatically by `CSTL_define_*_type`.\n"]
-    pub align_lg: u8,
-    #[doc = " Determines whether `move_from` can be called on a `void*` pointer\n to an object of this type.\n\n Set by `CSTL_define_*_type` or manually.\n"]
-    pub use_move_from: u8,
-    #[doc = " Opaque bitfield with unstable ABI.\n"]
-    pub internal_flags: u8,
-    #[doc = " Bound copy constructor function.\n\n It is NOT permitted to mutate the `source`.\n\n If null a `memmove(new_instance, src, size)` will be used in its stead.\n"]
-    pub copy_from: ::std::option::Option<
-        unsafe extern "C" fn(
-            new_instance: *mut ::std::os::raw::c_void,
-            src: *const ::std::os::raw::c_void,
-        ),
-    >,
-    #[doc = " Bound move constructor function.\n\n It is permitted to mutate the `source`, therefore it is suitable\n for a move constructor.\n\n Remember that the moved-from object must stay in a valid state\n and be able to be destroyed after this call.\n\n If null a `memmove(new_instance, src, size)` will be used in its stead.\n"]
-    pub move_from: ::std::option::Option<
-        unsafe extern "C" fn(
-            new_instance: *mut ::std::os::raw::c_void,
-            src: *mut ::std::os::raw::c_void,
-        ),
-    >,
-    #[doc = " Bound destructor function.\n\n If null a `memset(instance, 0xDE, size)` will be used in its stead.\n"]
-    pub destroy: ::std::option::Option<unsafe extern "C" fn(instance: *mut ::std::os::raw::c_void)>,
+pub struct CSTL_SType {
+    _unused: [u8; 0],
+}
+#[doc = " Opaque pseudohandle to the size and alignment of a C type.\n\n Defined with `CSTL_define_type`, it is valid if not equal to `NULL`.\n\n The size of the type must be less than or equal to `INTPTR_MAX`.\n"]
+pub type CSTL_Type = *mut CSTL_SType;
+#[doc = " Destroy range.\n\n Required to destroy objects in the range `[first, last)`.\n\n After this call, all objects in the range `[first, last)` are\n treated as uninitialized memory.\n"]
+pub type CSTL_Drop = ::std::option::Option<
+    unsafe extern "C" fn(first: *mut ::std::os::raw::c_void, last: *mut ::std::os::raw::c_void),
+>;
+#[doc = " Move range.\n\n Required to write `last - first` objects to uninitialized memory at\n `dest` so that each of them is equal to the corresponding object in\n the range `[first, last)` before the operation.\n\n After this call, all objects in the range `[first, last)` are\n treated as valid objects in an unspecified state.\n"]
+pub type CSTL_Move = ::std::option::Option<
+    unsafe extern "C" fn(
+        first: *mut ::std::os::raw::c_void,
+        last: *mut ::std::os::raw::c_void,
+        dest: *mut ::std::os::raw::c_void,
+    ),
+>;
+#[doc = " Copy range.\n\n Required to write `(last - first) / size` objects to uninitialized\n memory at `dest` so that each of them is equal to the corresponding\n object in the range `[first, last)`.\n\n Note that a `CSTL_Copy` function satisfies the requirements of\n `CSTL_Move`.\n"]
+pub type CSTL_Copy = ::std::option::Option<
+    unsafe extern "C" fn(
+        first: *const ::std::os::raw::c_void,
+        last: *const ::std::os::raw::c_void,
+        dest: *mut ::std::os::raw::c_void,
+    ),
+>;
+#[doc = " Fill range.\n\n Required to write `(last - first) / size` copies of `instance`\n to uninitialized memory at `[first, last)` so that each of them\n is equal to the corresponding `instance`.\n"]
+pub type CSTL_Fill = ::std::option::Option<
+    unsafe extern "C" fn(
+        first: *mut ::std::os::raw::c_void,
+        last: *mut ::std::os::raw::c_void,
+        value: *const ::std::os::raw::c_void,
+    ),
+>;
+#[doc = " Function table for a type that can be destroyed by calling `drop`\n on a range of objects of that type.\n"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct CSTL_DropType {
+    pub drop: CSTL_Drop,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of CSTL_Type"][::std::mem::size_of::<CSTL_Type>() - 48usize];
-    ["Alignment of CSTL_Type"][::std::mem::align_of::<CSTL_Type>() - 8usize];
-    ["Offset of field: CSTL_Type::size"][::std::mem::offset_of!(CSTL_Type, size) - 0usize];
-    ["Offset of field: CSTL_Type::size_rcp"][::std::mem::offset_of!(CSTL_Type, size_rcp) - 8usize];
-    ["Offset of field: CSTL_Type::size_rcp_sh"]
-        [::std::mem::offset_of!(CSTL_Type, size_rcp_sh) - 16usize];
-    ["Offset of field: CSTL_Type::align_lg"][::std::mem::offset_of!(CSTL_Type, align_lg) - 17usize];
-    ["Offset of field: CSTL_Type::use_move_from"]
-        [::std::mem::offset_of!(CSTL_Type, use_move_from) - 18usize];
-    ["Offset of field: CSTL_Type::internal_flags"]
-        [::std::mem::offset_of!(CSTL_Type, internal_flags) - 19usize];
-    ["Offset of field: CSTL_Type::copy_from"]
-        [::std::mem::offset_of!(CSTL_Type, copy_from) - 24usize];
-    ["Offset of field: CSTL_Type::move_from"]
-        [::std::mem::offset_of!(CSTL_Type, move_from) - 32usize];
-    ["Offset of field: CSTL_Type::destroy"][::std::mem::offset_of!(CSTL_Type, destroy) - 40usize];
+    ["Size of CSTL_DropType"][::std::mem::size_of::<CSTL_DropType>() - 8usize];
+    ["Alignment of CSTL_DropType"][::std::mem::align_of::<CSTL_DropType>() - 8usize];
+    ["Offset of field: CSTL_DropType::drop"][::std::mem::offset_of!(CSTL_DropType, drop) - 0usize];
 };
-#[doc = " Reference to a mutable `CSTL_TypeRef`.\n\n Must not be null.\n"]
-pub type CSTL_TypeRef = *mut CSTL_Type;
-#[doc = " Reference to a const `CSTL_TypeRef`.\n\n Must not be null.\n"]
-pub type CSTL_TypeCRef = *const CSTL_Type;
-#[doc = " Type info used in place of a template parameter for a type that can be compared.\n\n The type must establish an equivalence relation:\n `is_eq(a, b) == true` => `is_eq(b, a) == true`,\n `is_eq(a, b) == true` && `is_eq(b, c) == true` => `is_eq(a, c) == true`,\n\n Base `CSTL_Type` behavior and size and alignment requirements are unchanged.\n"]
+#[doc = " Function table for a type that can be moved by calling `move`\n on a range of objects of that type to another range, or destroyed.\n"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct CSTL_EqType {
-    #[doc = " The underlying type info.\n"]
-    pub base: CSTL_Type,
-    #[doc = " Bound \"equality\" binary function.\n\n Must establish an equivalence relation.\n\n If null a `memcmp(lhs, rhs, size) == 0` will be used in its stead.\n"]
-    pub is_eq: ::std::option::Option<
-        unsafe extern "C" fn(
-            lhs: *const ::std::os::raw::c_void,
-            rhs: *const ::std::os::raw::c_void,
-        ) -> bool,
-    >,
+pub struct CSTL_MoveType {
+    pub drop_type: CSTL_DropType,
+    pub move_: CSTL_Move,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of CSTL_EqType"][::std::mem::size_of::<CSTL_EqType>() - 56usize];
-    ["Alignment of CSTL_EqType"][::std::mem::align_of::<CSTL_EqType>() - 8usize];
-    ["Offset of field: CSTL_EqType::base"][::std::mem::offset_of!(CSTL_EqType, base) - 0usize];
-    ["Offset of field: CSTL_EqType::is_eq"][::std::mem::offset_of!(CSTL_EqType, is_eq) - 48usize];
+    ["Size of CSTL_MoveType"][::std::mem::size_of::<CSTL_MoveType>() - 16usize];
+    ["Alignment of CSTL_MoveType"][::std::mem::align_of::<CSTL_MoveType>() - 8usize];
+    ["Offset of field: CSTL_MoveType::drop_type"]
+        [::std::mem::offset_of!(CSTL_MoveType, drop_type) - 0usize];
+    ["Offset of field: CSTL_MoveType::move_"]
+        [::std::mem::offset_of!(CSTL_MoveType, move_) - 8usize];
 };
-#[doc = " Reference to a mutable `CSTL_EqType`.\n\n Must not be null.\n"]
-pub type CSTL_EqTypeRef = *mut CSTL_EqType;
-#[doc = " Reference to a const `CSTL_EqType`.\n\n Must not be null.\n"]
-pub type CSTL_EqTypeCRef = *const CSTL_EqType;
-#[doc = " Type info used in place of a template parameter for a type that can be compared.\n\n The type must establish at least a strict weak ordering:\n `is_lt(a, b) == true` => `is_lt(b, a) == false`\n `is_lt(a, b) == true` && `is_lt(b, c) == true` => `is_lt(a, c) == true`\n\n Base `CSTL_EqType` behavior and size and alignment requirements are unchanged.\n"]
+#[doc = " Function table for a type that can be copied by calling `copy`\n on a range of objects of that type to another range, or moved, or destroyed.\n\n It is valid for `copy` to bind the same function as `move_type.move`.\n"]
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct CSTL_CopyType {
+    pub move_type: CSTL_MoveType,
+    pub copy: CSTL_Copy,
+    pub fill: CSTL_Fill,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of CSTL_CopyType"][::std::mem::size_of::<CSTL_CopyType>() - 32usize];
+    ["Alignment of CSTL_CopyType"][::std::mem::align_of::<CSTL_CopyType>() - 8usize];
+    ["Offset of field: CSTL_CopyType::move_type"]
+        [::std::mem::offset_of!(CSTL_CopyType, move_type) - 0usize];
+    ["Offset of field: CSTL_CopyType::copy"][::std::mem::offset_of!(CSTL_CopyType, copy) - 16usize];
+    ["Offset of field: CSTL_CopyType::fill"][::std::mem::offset_of!(CSTL_CopyType, fill) - 24usize];
+};
+#[doc = " Reference to a const `CSTL_DropType`.\n\n Must not be null.\n"]
+pub type CSTL_DropTypeCRef = *const CSTL_DropType;
+#[doc = " Reference to a const `CSTL_MoveType`.\n\n Must not be null.\n"]
+pub type CSTL_MoveTypeCRef = *const CSTL_MoveType;
+#[doc = " Reference to a const `CSTL_CopyType`.\n\n Must not be null.\n"]
+pub type CSTL_CopyTypeCRef = *const CSTL_CopyType;
+#[doc = " Compare two objects for equality.\n\n The function must establish an equivalence relation:\n `a == b` => `b == a`, `a == b` && `b == c` => `a == c`\n"]
+pub type CSTL_IsEq = ::std::option::Option<
+    unsafe extern "C" fn(
+        lhs: *const ::std::os::raw::c_void,
+        rhs: *const ::std::os::raw::c_void,
+    ) -> bool,
+>;
+#[doc = " Compare two objects for less than.\n\n The function must establish at least a strict weak ordering:\n `a < b` => `b < a == false`\n `a < b` && `b < c` => `a < c`\n"]
+pub type CSTL_IsLt = ::std::option::Option<
+    unsafe extern "C" fn(
+        lhs: *const ::std::os::raw::c_void,
+        rhs: *const ::std::os::raw::c_void,
+    ) -> bool,
+>;
+#[doc = " Function table for a type instances of which can be ordered\n with respect to others in a string weak ordering.\n"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct CSTL_CompType {
-    #[doc = " The underlying type info.\n"]
-    pub base: CSTL_EqType,
-    #[doc = " Bound \"less than\" binary function.\n\n Must establish a strict weak ordering relation.\n\n If null a `memcmp(lhs, rhs, size) < 0` will be used in its stead.\n"]
-    pub is_lt: ::std::option::Option<
-        unsafe extern "C" fn(
-            lhs: *const ::std::os::raw::c_void,
-            rhs: *const ::std::os::raw::c_void,
-        ) -> bool,
-    >,
+    pub is_eq: CSTL_IsEq,
+    pub is_lt: CSTL_IsLt,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of CSTL_CompType"][::std::mem::size_of::<CSTL_CompType>() - 64usize];
+    ["Size of CSTL_CompType"][::std::mem::size_of::<CSTL_CompType>() - 16usize];
     ["Alignment of CSTL_CompType"][::std::mem::align_of::<CSTL_CompType>() - 8usize];
-    ["Offset of field: CSTL_CompType::base"][::std::mem::offset_of!(CSTL_CompType, base) - 0usize];
+    ["Offset of field: CSTL_CompType::is_eq"]
+        [::std::mem::offset_of!(CSTL_CompType, is_eq) - 0usize];
     ["Offset of field: CSTL_CompType::is_lt"]
-        [::std::mem::offset_of!(CSTL_CompType, is_lt) - 56usize];
+        [::std::mem::offset_of!(CSTL_CompType, is_lt) - 8usize];
 };
-#[doc = " Reference to a mutable `CSTL_CompType`.\n\n Must not be null.\n"]
-pub type CSTL_CompTypeRef = *mut CSTL_CompType;
-#[doc = " Reference to a const `CSTL_CompType`.\n\n Must not be null.\n"]
-pub type CSTL_CompTypeCRef = *const CSTL_CompType;
-#[doc = " Type info used in place of a template parameter for a type that can be hashed.\n\n The relation `is_eq(a, b)` => `hash(a) == hash(b)` must hold.\n\n Base `CSTL_EqType` behavior and size and alignment requirements are unchanged.\n"]
+#[doc = " Obtain a hash for an instance of an object.\n\n The relation `a == b` => `hash(a) == hash(b)` must hold.\n"]
+pub type CSTL_Hash =
+    ::std::option::Option<unsafe extern "C" fn(instance: *const ::std::os::raw::c_void) -> usize>;
+#[doc = " Function table for a type instances of which can be hashed\n and compared for equality.\n"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct CSTL_HashType {
-    #[doc = " The underlying type info.\n"]
-    pub base: CSTL_EqType,
-    #[doc = " Bound hash function.\n\n If `is_eq(a, b)` then `hash(a) == hash(b)`.\n\n If null an STL `std::hash` conforming implementation will be used in its stead.\n"]
-    pub hash: ::std::option::Option<
-        unsafe extern "C" fn(instance: *const ::std::os::raw::c_void) -> usize,
-    >,
+    pub is_eq: CSTL_IsEq,
+    pub hash: CSTL_Hash,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of CSTL_HashType"][::std::mem::size_of::<CSTL_HashType>() - 64usize];
+    ["Size of CSTL_HashType"][::std::mem::size_of::<CSTL_HashType>() - 16usize];
     ["Alignment of CSTL_HashType"][::std::mem::align_of::<CSTL_HashType>() - 8usize];
-    ["Offset of field: CSTL_HashType::base"][::std::mem::offset_of!(CSTL_HashType, base) - 0usize];
-    ["Offset of field: CSTL_HashType::hash"][::std::mem::offset_of!(CSTL_HashType, hash) - 56usize];
+    ["Offset of field: CSTL_HashType::is_eq"]
+        [::std::mem::offset_of!(CSTL_HashType, is_eq) - 0usize];
+    ["Offset of field: CSTL_HashType::hash"][::std::mem::offset_of!(CSTL_HashType, hash) - 8usize];
 };
-#[doc = " Reference to a mutable `CSTL_HashType`.\n\n Must not be null.\n"]
-pub type CSTL_HashTypeRef = *mut CSTL_HashType;
-#[doc = " Reference to a const `CSTL_HashType`.\n\n Must not be null.\n"]
-pub type CSTL_HashTypeCRef = *const CSTL_HashType;
-#[doc = " Other error, zero initialized state of `CSTL_TypeErr`.\n"]
-pub const CSTL_TypeErr_Other: CSTL_TypeErr = 0;
-#[doc = " No error.\n"]
-pub const CSTL_TypeErr_Ok: CSTL_TypeErr = 1;
-#[doc = " Improper size of type.\n\n The size of a type must be a non-zero multiple of its alignment.\n\n Cstl also imposes a maximum size `SIZE_MAX / 2` for optimization reasons.\n\n It follows from the alignment requirement that an alignment of `SIZE_MAX / 2 + 1`\n is impossible, and `size + alignment` cannot overflow.\n"]
-pub const CSTL_TypeErr_BadSize: CSTL_TypeErr = 2;
-#[doc = " Improper alignment of type.\n\n Types must have a non-zero power of 2 alignment.\n"]
-pub const CSTL_TypeErr_Misaligned: CSTL_TypeErr = 3;
-#[doc = " Pointer passed as `new_instance` was null.\n"]
-pub const CSTL_TypeErr_NullPointer: CSTL_TypeErr = 4;
-#[doc = " All possible return values of `CSTL_define_*_type`.\n"]
-pub type CSTL_TypeErr = ::std::os::raw::c_int;
 unsafe extern "C" {
-    #[doc = " Define a type, writing it to `new_instance` and validating parameters.\n\n `copy_from`, `move_from`, `destroy` may be null, in which case their default\n behavior is invoked. See descriptions of these fields in `CSTL_Type`.\n\n If `use_copy_from == false` and `use_move_from == false` most container\n relocation functions will fail.\n"]
-    pub fn CSTL_define_type(
-        new_instance: *mut CSTL_Type,
-        size: usize,
-        alignment: usize,
-        copy_from: ::std::option::Option<
-            unsafe extern "C" fn(
-                new_instance: *mut ::std::os::raw::c_void,
-                src: *const ::std::os::raw::c_void,
-            ),
-        >,
-        move_from: ::std::option::Option<
-            unsafe extern "C" fn(
-                new_instance: *mut ::std::os::raw::c_void,
-                src: *mut ::std::os::raw::c_void,
-            ),
-        >,
-        destroy: ::std::option::Option<unsafe extern "C" fn(instance: *mut ::std::os::raw::c_void)>,
-    ) -> CSTL_TypeErr;
+    #[doc = " Obtain a pseudohandle to the size and alignment of a C type.\n\n If the below requirements are broken, the function returns\n an invalid handle equal to `NULL`:\n 1. `size` must be a non-zero multiple of `alignment`.\n 2. `alignment` must be a power of 2.\n 3. `size` must be less than or equal to `INTPTR_MAX`.\n"]
+    pub fn CSTL_define_type(size: usize, alignment: usize) -> CSTL_Type;
 }
 unsafe extern "C" {
-    #[doc = " Define a type, writing it to `new_instance` and validating parameters.\n\n `copy_from`, `move_from`, `destroy`, `is_eq` may be null, in which case their default\n behavior is invoked. See descriptions of these fields in `CSTL_Type`.\n\n If `use_copy_from == false` and `use_move_from == false` most container\n relocation functions will fail.\n"]
-    pub fn CSTL_define_eq_type(
-        new_instance: *mut CSTL_EqType,
-        size: usize,
-        alignment: usize,
-        copy_from: ::std::option::Option<
-            unsafe extern "C" fn(
-                new_instance: *mut ::std::os::raw::c_void,
-                src: *const ::std::os::raw::c_void,
-            ),
-        >,
-        move_from: ::std::option::Option<
-            unsafe extern "C" fn(
-                new_instance: *mut ::std::os::raw::c_void,
-                src: *mut ::std::os::raw::c_void,
-            ),
-        >,
-        destroy: ::std::option::Option<unsafe extern "C" fn(instance: *mut ::std::os::raw::c_void)>,
-        is_eq: ::std::option::Option<
-            unsafe extern "C" fn(
-                lhs: *const ::std::os::raw::c_void,
-                rhs: *const ::std::os::raw::c_void,
-            ) -> bool,
-        >,
-    ) -> CSTL_TypeErr;
+    #[doc = " Get the size of a C type back from a packed pseudohandle representation.\n"]
+    pub fn CSTL_sizeof_type(type_: CSTL_Type) -> usize;
 }
 unsafe extern "C" {
-    #[doc = " Define a type, writing it to `new_instance` and validating parameters.\n\n `copy_from`, `move_from`, `destroy`, `is_eq`, `is_lt` may be null,\n in which case their default behavior is invoked. See descriptions\n of these fields in `CSTL_Type`.\n"]
-    pub fn CSTL_define_comp_type(
-        new_instance: *mut CSTL_CompType,
-        size: usize,
-        alignment: usize,
-        copy_from: ::std::option::Option<
-            unsafe extern "C" fn(
-                new_instance: *mut ::std::os::raw::c_void,
-                src: *const ::std::os::raw::c_void,
-            ),
-        >,
-        move_from: ::std::option::Option<
-            unsafe extern "C" fn(
-                new_instance: *mut ::std::os::raw::c_void,
-                src: *mut ::std::os::raw::c_void,
-            ),
-        >,
-        destroy: ::std::option::Option<unsafe extern "C" fn(instance: *mut ::std::os::raw::c_void)>,
-        is_eq: ::std::option::Option<
-            unsafe extern "C" fn(
-                lhs: *const ::std::os::raw::c_void,
-                rhs: *const ::std::os::raw::c_void,
-            ) -> bool,
-        >,
-        is_lt: ::std::option::Option<
-            unsafe extern "C" fn(
-                lhs: *const ::std::os::raw::c_void,
-                rhs: *const ::std::os::raw::c_void,
-            ) -> bool,
-        >,
-    ) -> CSTL_TypeErr;
-}
-unsafe extern "C" {
-    #[doc = " Define a type, writing it to `new_instance` and validating parameters.\n\n `copy_from`, `move_from`, `destroy`, `is_eq`, `hash` may be null,\n in which case their default behavior is invoked. See descriptions\n of these fields in `CSTL_Type`.\n"]
-    pub fn CSTL_define_hash_type(
-        new_instance: *mut CSTL_HashType,
-        size: usize,
-        alignment: usize,
-        copy_from: ::std::option::Option<
-            unsafe extern "C" fn(
-                new_instance: *mut ::std::os::raw::c_void,
-                src: *const ::std::os::raw::c_void,
-            ),
-        >,
-        move_from: ::std::option::Option<
-            unsafe extern "C" fn(
-                new_instance: *mut ::std::os::raw::c_void,
-                src: *mut ::std::os::raw::c_void,
-            ),
-        >,
-        destroy: ::std::option::Option<unsafe extern "C" fn(instance: *mut ::std::os::raw::c_void)>,
-        is_eq: ::std::option::Option<
-            unsafe extern "C" fn(
-                lhs: *const ::std::os::raw::c_void,
-                rhs: *const ::std::os::raw::c_void,
-            ) -> bool,
-        >,
-        hash: ::std::option::Option<
-            unsafe extern "C" fn(instance: *const ::std::os::raw::c_void) -> usize,
-        >,
-    ) -> CSTL_TypeErr;
+    #[doc = " Get the alignment of a C type back from a packed pseudohandle representation.\n"]
+    pub fn CSTL_alignof_type(type_: CSTL_Type) -> usize;
 }
 #[doc = " STL ABI `std::vector` layout.\n\n Does not include the allocator, which nonetheless is a part of the `std::vector`\n structure! You are responsible for including it, since it can take on any form.\n\n Do not manipulate the members directly, use the associated functions!\n"]
 #[repr(C)]
@@ -312,28 +206,12 @@ const _: () = {
 pub type CSTL_VectorRef = *mut CSTL_VectorVal;
 #[doc = " Reference to a const `CSTL_VectorVal`.\n\n Must not be null.\n"]
 pub type CSTL_VectorCRef = *const CSTL_VectorVal;
-#[doc = " A representation of the parts making up a vector.\n\n Contains a references to `CSTL_VectorVal` and `CSTL_Type` which must all outlive it.\n\n This struct is *not* `std::vector`, it simply contains references\n to the parts necessary for its manipulation.\n"]
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct CSTL_VectorCtx {
-    pub instance: CSTL_VectorCRef,
-    pub type_: CSTL_TypeCRef,
-}
-#[allow(clippy::unnecessary_operation, clippy::identity_op)]
-const _: () = {
-    ["Size of CSTL_VectorCtx"][::std::mem::size_of::<CSTL_VectorCtx>() - 16usize];
-    ["Alignment of CSTL_VectorCtx"][::std::mem::align_of::<CSTL_VectorCtx>() - 8usize];
-    ["Offset of field: CSTL_VectorCtx::instance"]
-        [::std::mem::offset_of!(CSTL_VectorCtx, instance) - 0usize];
-    ["Offset of field: CSTL_VectorCtx::type_"]
-        [::std::mem::offset_of!(CSTL_VectorCtx, type_) - 8usize];
-};
 #[doc = " An iterator over elements of a vector.\n\n Contains a reference to a `CSTL_Type` which must outlive it.\n\n Not ABI-compatible with `std::vector::iterator`.\n"]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct CSTL_VectorIter {
     pub pointer: *const ::std::os::raw::c_void,
-    pub type_: CSTL_TypeCRef,
+    pub size: usize,
     pub owner: CSTL_VectorCRef,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
@@ -342,114 +220,154 @@ const _: () = {
     ["Alignment of CSTL_VectorIter"][::std::mem::align_of::<CSTL_VectorIter>() - 8usize];
     ["Offset of field: CSTL_VectorIter::pointer"]
         [::std::mem::offset_of!(CSTL_VectorIter, pointer) - 0usize];
-    ["Offset of field: CSTL_VectorIter::type_"]
-        [::std::mem::offset_of!(CSTL_VectorIter, type_) - 8usize];
+    ["Offset of field: CSTL_VectorIter::size"]
+        [::std::mem::offset_of!(CSTL_VectorIter, size) - 8usize];
     ["Offset of field: CSTL_VectorIter::owner"]
         [::std::mem::offset_of!(CSTL_VectorIter, owner) - 16usize];
 };
 unsafe extern "C" {
-    #[doc = " Initializes the vector pointed to by `context->instance`, but does not allocate any memory.\n\n An initialized vector can be trivially destroyed without leaks as long\n as no functions that allocate (push, insert, reserve, etc.) have been called on it.\n\n Re-initializing a vector with a backing memory allocation will leak the old\n memory allocation.\n"]
-    pub fn CSTL_vector_construct(context: CSTL_VectorCtx);
+    #[doc = " Initializes the vector pointed to by `new_instance`, but does not allocate any memory.\n\n An initialized vector can be trivially destroyed without leaks as long\n as no functions that allocate (push, insert, reserve, etc.) have been called on it.\n\n Re-initializing a vector with a backing memory allocation will leak the old\n memory allocation.\n"]
+    pub fn CSTL_vector_construct(new_instance: *mut CSTL_VectorVal);
 }
 unsafe extern "C" {
-    #[doc = " Destroys the vector pointed to by `context->instance`, destroying elements\n and freeing the backing storage.\n"]
-    pub fn CSTL_vector_destroy(context: CSTL_VectorCtx, alloc: *mut CSTL_Alloc);
+    #[doc = " Destroys the vector pointed to by `instance`, destroying elements\n and freeing the backing storage.\n"]
+    pub fn CSTL_vector_destroy(
+        instance: CSTL_VectorRef,
+        type_: CSTL_Type,
+        drop: CSTL_DropTypeCRef,
+        alloc: *mut CSTL_Alloc,
+    );
 }
 unsafe extern "C" {
-    #[doc = " Destroys vector contents, replacing them with `new_size` copies of `value`.\n\n If `new_size > CSTL_vector_max_size(context.type)` (vector too long)\n this function has no effect and returns `false`, otherwise it returns `true`.\n\n `value` cannot point to an element inside the vector.\n"]
-    pub fn CSTL_vector_assign(
-        context: CSTL_VectorCtx,
+    #[doc = " Replaces the contents of `instance` with the contents of `other_instance`.\n\n If `propagate_alloc == true && alloc != other_alloc` then storage\n is freed with `alloc` and allocated again with `other_alloc` before elements\n are copied. Then, `instance` uses `other_alloc` as its allocator. If\n the allocation fails, returns `false`, otherwise always returns `true`.\n\n If `propagate_alloc == false` `instance` keeps using `alloc` as its allocator,\n potentially reusing its storage.\n\n You are responsible for replacing the allocator outside of `CSTL_VectorVal` if applicable.\n"]
+    pub fn CSTL_vector_copy_assign(
+        instance: CSTL_VectorRef,
+        type_: CSTL_Type,
+        copy: CSTL_CopyTypeCRef,
+        other_instance: CSTL_VectorCRef,
+        alloc: *mut CSTL_Alloc,
+        other_alloc: *mut CSTL_Alloc,
+        propagate_alloc: bool,
+    ) -> bool;
+}
+unsafe extern "C" {
+    #[doc = " Moves the contents of `other_instance` to the contents of `instance`.\n\n If `propagate_alloc == true` storage is replaced with storage of `other_instance`.\n Then, `instance` uses `other_alloc` as its allocator.\n\n If `propagate_alloc == false && alloc != other_alloc` then storage is reused\n and individual elements of `other_instance` are moved in. If the allocation fails,\n returns `false`, otherwise always returns `true`. Then, `instance` uses\n `alloc` as its allocator.\n\n You are responsible for replacing the allocator outside of `CSTL_VectorVal` if applicable.\n"]
+    pub fn CSTL_vector_move_assign(
+        instance: CSTL_VectorRef,
+        type_: CSTL_Type,
+        move_: CSTL_MoveTypeCRef,
+        other_instance: CSTL_VectorRef,
+        alloc: *mut CSTL_Alloc,
+        other_alloc: *mut CSTL_Alloc,
+        propagate_alloc: bool,
+    ) -> bool;
+}
+unsafe extern "C" {
+    #[doc = " Destroys vector contents, replacing them with a copy of the range `[first, last)`.\n\n If `new_size > CSTL_vector_max_size(type)` (vector too long)\n this function has no effect and returns `false`, otherwise it returns `true`.\n"]
+    pub fn CSTL_vector_copy_assign_range(
+        instance: CSTL_VectorRef,
+        type_: CSTL_Type,
+        copy: CSTL_CopyTypeCRef,
+        first: *const ::std::os::raw::c_void,
+        last: *const ::std::os::raw::c_void,
+        alloc: *mut CSTL_Alloc,
+    ) -> bool;
+}
+unsafe extern "C" {
+    #[doc = " Destroys vector contents, replacing them with a copy of the range `[first, last)`.\n\n If `new_size > CSTL_vector_max_size(type)` (vector too long)\n this function has no effect and returns `false`, otherwise it returns `true`.\n"]
+    pub fn CSTL_vector_move_assign_range(
+        instance: CSTL_VectorRef,
+        type_: CSTL_Type,
+        move_: CSTL_MoveTypeCRef,
+        first: *mut ::std::os::raw::c_void,
+        last: *mut ::std::os::raw::c_void,
+        alloc: *mut CSTL_Alloc,
+    ) -> bool;
+}
+unsafe extern "C" {
+    #[doc = " Destroys vector contents, replacing them with `new_size` copies of `value`.\n\n If `new_size > CSTL_vector_max_size(type)` (vector too long)\n this function has no effect and returns `false`, otherwise it returns `true`.\n"]
+    pub fn CSTL_vector_assign_n(
+        instance: CSTL_VectorRef,
+        type_: CSTL_Type,
+        copy: CSTL_CopyTypeCRef,
         new_size: usize,
         value: *const ::std::os::raw::c_void,
         alloc: *mut CSTL_Alloc,
     ) -> bool;
 }
 unsafe extern "C" {
-    #[doc = " Destroys vector contents, replacing them with a copy of the range `[first, first + new_size)`.\n\n If `new_size > CSTL_vector_max_size(context.type)` (vector too long)\n this function has no effect and returns `false`, otherwise it returns `true`.\n\n `first` cannot point inside the vector.\n"]
-    pub fn CSTL_vector_assign_continuous_range(
-        context: CSTL_VectorCtx,
-        new_size: usize,
-        first: *const ::std::os::raw::c_void,
-        alloc: *mut CSTL_Alloc,
-    ) -> bool;
-}
-unsafe extern "C" {
-    #[doc = " Replaces the contents of `context->instance` with the contents of `other_context->instance`.\n\n If `propagate_alloc == true && alloc != other_alloc` then storage\n is freed with `alloc` and allocated again with `context->other_alloc` before elements\n are copied. Then, `context->instance` uses `context->other_alloc` as its allocator.\n\n If `propagate_alloc == false` `context->instance` keeps using `alloc` as its allocator,\n potentially reusing its storage.\n\n You are responsible for replacing the allocator outside of `CSTL_VectorVal` if applicable.\n"]
-    pub fn CSTL_vector_copy_assign(
-        context: CSTL_VectorCtx,
-        alloc: *mut CSTL_Alloc,
-        other_context: CSTL_VectorCtx,
-        other_alloc: *mut CSTL_Alloc,
-        propagate_alloc: bool,
-    );
-}
-unsafe extern "C" {
-    #[doc = " Moves the contents of `other_context->instance` to the contents of `context->instance`.\n\n If `propagate_alloc == true` storage is replaced with storage of `other_context->instance`.\n Then, `context->instance` uses `context->other_alloc` as its allocator.\n\n If `propagate_alloc == false && alloc != other_alloc` then storage is reused\n and individual elements of `context->other` are moved in.\n Then, `context->instance` uses `alloc` as its allocator.\n\n You are responsible for replacing the allocator outside of `CSTL_VectorVal` if applicable.\n"]
-    pub fn CSTL_vector_move_assign(
-        context: CSTL_VectorCtx,
-        alloc: *mut CSTL_Alloc,
-        other_context: CSTL_VectorCtx,
-        other_alloc: *mut CSTL_Alloc,
-        propagate_alloc: bool,
-    );
-}
-unsafe extern "C" {
     #[doc = " Swaps vector contents.\n\n You are responsible for swapping the allocators.\n"]
-    pub fn CSTL_vector_swap(context: CSTL_VectorCtx, other_context: CSTL_VectorCtx);
+    pub fn CSTL_vector_swap(instance: CSTL_VectorRef, other_instance: CSTL_VectorRef);
 }
 unsafe extern "C" {
-    #[doc = " Returns a pointer to the element at `pos`.\n\n If `pos >= CSTL_vector_size(context)` the behavior is undefined.\n"]
-    pub fn CSTL_vector_index(context: CSTL_VectorCtx, pos: usize) -> *mut ::std::os::raw::c_void;
+    #[doc = " Returns a pointer to the element at `pos`.\n\n If `pos >= CSTL_vector_size(instance, type)` the behavior is undefined.\n"]
+    pub fn CSTL_vector_index(
+        instance: CSTL_VectorRef,
+        type_: CSTL_Type,
+        pos: usize,
+    ) -> *mut ::std::os::raw::c_void;
 }
 unsafe extern "C" {
-    #[doc = " Returns a const pointer to the element at `pos`.\n\n If `pos >= CSTL_vector_size(context)` the behavior is undefined.\n"]
+    #[doc = " Returns a const pointer to the element at `pos`.\n\n If `pos >= CSTL_vector_size(instance, type)` the behavior is undefined.\n"]
     pub fn CSTL_vector_const_index(
-        context: CSTL_VectorCtx,
+        instance: CSTL_VectorCRef,
+        type_: CSTL_Type,
         pos: usize,
     ) -> *const ::std::os::raw::c_void;
 }
 unsafe extern "C" {
-    #[doc = " Returns a pointer to the element at `pos`.\n\n If `pos >= CSTL_vector_size(context)` a null pointer is returned.\n"]
-    pub fn CSTL_vector_at(context: CSTL_VectorCtx, pos: usize) -> *mut ::std::os::raw::c_void;
+    #[doc = " Returns a pointer to the element at `pos`.\n\n If `pos >= CSTL_vector_size(instance, type)` a null pointer is returned.\n"]
+    pub fn CSTL_vector_at(
+        instance: CSTL_VectorRef,
+        type_: CSTL_Type,
+        pos: usize,
+    ) -> *mut ::std::os::raw::c_void;
 }
 unsafe extern "C" {
-    #[doc = " Returns a const pointer to the element at `pos`.\n\n If `pos >= CSTL_vector_size(context)` a null pointer is returned.\n"]
+    #[doc = " Returns a const pointer to the element at `pos`.\n\n If `pos >= CSTL_vector_size(instance, type)` a null pointer is returned.\n"]
     pub fn CSTL_vector_const_at(
-        context: CSTL_VectorCtx,
+        instance: CSTL_VectorCRef,
+        type_: CSTL_Type,
         pos: usize,
     ) -> *const ::std::os::raw::c_void;
 }
 unsafe extern "C" {
-    #[doc = " Returns a pointer to the first element in the vector.\n\n If `CSTL_vector_empty(context) == true` the behavior is undefined.\n"]
-    pub fn CSTL_vector_front(context: CSTL_VectorCtx) -> *mut ::std::os::raw::c_void;
+    #[doc = " Returns a pointer to the first element in the vector.\n\n If `CSTL_vector_empty(instance) == true` the behavior is undefined.\n"]
+    pub fn CSTL_vector_front(instance: CSTL_VectorRef) -> *mut ::std::os::raw::c_void;
 }
 unsafe extern "C" {
-    #[doc = " Returns a const pointer to the first element in the vector.\n\n If `CSTL_vector_empty(context) == true` the behavior is undefined.\n"]
-    pub fn CSTL_vector_const_front(context: CSTL_VectorCtx) -> *const ::std::os::raw::c_void;
+    #[doc = " Returns a const pointer to the first element in the vector.\n\n If `CSTL_vector_empty(instance) == true` the behavior is undefined.\n"]
+    pub fn CSTL_vector_const_front(instance: CSTL_VectorCRef) -> *const ::std::os::raw::c_void;
 }
 unsafe extern "C" {
-    #[doc = " Returns a pointer to the last element in the vector.\n\n If `CSTL_vector_empty(context) == true` the behavior is undefined.\n"]
-    pub fn CSTL_vector_back(context: CSTL_VectorCtx) -> *mut ::std::os::raw::c_void;
+    #[doc = " Returns a pointer to the last element in the vector.\n\n If `CSTL_vector_empty(instance) == true` the behavior is undefined.\n"]
+    pub fn CSTL_vector_back(
+        instance: CSTL_VectorRef,
+        type_: CSTL_Type,
+    ) -> *mut ::std::os::raw::c_void;
 }
 unsafe extern "C" {
-    #[doc = " Returns a const pointer to the last element in the vector.\n\n If `CSTL_vector_empty(context) == true` the behavior is undefined.\n"]
-    pub fn CSTL_vector_const_back(context: CSTL_VectorCtx) -> *const ::std::os::raw::c_void;
+    #[doc = " Returns a const pointer to the last element in the vector.\n\n If `CSTL_vector_empty(instance) == true` the behavior is undefined.\n"]
+    pub fn CSTL_vector_const_back(
+        instance: CSTL_VectorCRef,
+        type_: CSTL_Type,
+    ) -> *const ::std::os::raw::c_void;
 }
 unsafe extern "C" {
     #[doc = " Returns a pointer to the underlying storage.\n\n The returned pointer is valid even if the vector is empty,\n in which case it is not dereferenceable.\n"]
-    pub fn CSTL_vector_data(context: CSTL_VectorCtx) -> *mut ::std::os::raw::c_void;
+    pub fn CSTL_vector_data(instance: CSTL_VectorRef) -> *mut ::std::os::raw::c_void;
 }
 unsafe extern "C" {
     #[doc = " Returns a pointer to the underlying storage.\n\n The returned pointer is valid even if the vector is empty,\n in which case it is not dereferenceable.\n"]
-    pub fn CSTL_vector_const_data(context: CSTL_VectorCtx) -> *const ::std::os::raw::c_void;
+    pub fn CSTL_vector_const_data(instance: CSTL_VectorCRef) -> *const ::std::os::raw::c_void;
 }
 unsafe extern "C" {
     #[doc = " Construct an iterator to the first element of the vector.\n\n If the vector is empty: `CSTL_vector_iterator_eq(begin, end) == true`.\n"]
-    pub fn CSTL_vector_begin(context: CSTL_VectorCtx) -> CSTL_VectorIter;
+    pub fn CSTL_vector_begin(instance: CSTL_VectorCRef, type_: CSTL_Type) -> CSTL_VectorIter;
 }
 unsafe extern "C" {
-    #[doc = " Construct a const iterator to the first element of the vector.\n\n If the vector is empty: `CSTL_vector_const_iterator_eq(begin, end) == true`.\n"]
-    pub fn CSTL_vector_end(context: CSTL_VectorCtx) -> CSTL_VectorIter;
+    #[doc = " Construct an iterator past the last element of the vector.\n\n If the vector is empty: `CSTL_vector_iterator_eq(begin, end) == true`.\n"]
+    pub fn CSTL_vector_end(instance: CSTL_VectorCRef, type_: CSTL_Type) -> CSTL_VectorIter;
 }
 unsafe extern "C" {
     #[doc = " Seeks the iterator forwards by `n` elements.\n\n Returns a new iterator at the resulting iterator position.\n"]
@@ -471,53 +389,151 @@ unsafe extern "C" {
     ) -> *mut ::std::os::raw::c_void;
 }
 unsafe extern "C" {
-    #[doc = " Subtracts two iterators and returns the distance measured in elements.\n\n Returns the signed number of elements between two iterators.\n\n They must belong to the same vector and have compatible `CSTL_Type`s.\n"]
+    #[doc = " Subtracts two iterators and returns the distance measured in elements.\n\n Returns the signed number of elements between two iterators.\n\n They must belong to the same vector.\n"]
     pub fn CSTL_vector_iterator_distance(lhs: CSTL_VectorIter, rhs: CSTL_VectorIter) -> isize;
 }
 unsafe extern "C" {
-    #[doc = " Compares iterators for equality.\n\n They must belong to the same vector and have compatible `CSTL_Type`s.\n"]
+    #[doc = " Compares iterators for equality.\n\n They must belong to the same vector.\n"]
     pub fn CSTL_vector_iterator_eq(lhs: CSTL_VectorIter, rhs: CSTL_VectorIter) -> bool;
 }
 unsafe extern "C" {
-    #[doc = " Compares iterators for less than.\n\n They must belong to the same vector and have compatible `CSTL_Type`s.\n"]
+    #[doc = " Compares iterators for less than.\n\n They must belong to the same vector.\n"]
     pub fn CSTL_vector_iterator_lt(lhs: CSTL_VectorIter, rhs: CSTL_VectorIter) -> bool;
 }
 unsafe extern "C" {
     #[doc = " Returns `true` if the vector is empty or `false` otherwise.\n"]
-    pub fn CSTL_vector_empty(context: CSTL_VectorCtx) -> bool;
+    pub fn CSTL_vector_empty(instance: CSTL_VectorCRef) -> bool;
 }
 unsafe extern "C" {
     #[doc = " Returns the number of elements in the vector.\n"]
-    pub fn CSTL_vector_size(context: CSTL_VectorCtx) -> usize;
+    pub fn CSTL_vector_size(instance: CSTL_VectorCRef, type_: CSTL_Type) -> usize;
 }
 unsafe extern "C" {
     #[doc = " Returns the total element capacity of the vector.\n"]
-    pub fn CSTL_vector_capacity(context: CSTL_VectorCtx) -> usize;
+    pub fn CSTL_vector_capacity(instance: CSTL_VectorCRef, type_: CSTL_Type) -> usize;
 }
 unsafe extern "C" {
-    #[doc = " Returns the maximum possible number of elements in the vector.\n\n As if by `PTRDIFF_MAX / type->size`.\n"]
-    pub fn CSTL_vector_max_size(type_: CSTL_TypeCRef) -> usize;
+    #[doc = " Returns the maximum possible number of elements in the vector.\n\n As if by `(PTRDIFF_MAX - 1) / CSTL_type_size(type)`.\n"]
+    pub fn CSTL_vector_max_size(type_: CSTL_Type) -> usize;
 }
 unsafe extern "C" {
-    #[doc = " If `new_capacity > CSTL_vector_capacity(context)`, reallocates and expands\n the vector storage.\n\n If `new_capacity` exceeds `CSTL_vector_max_size(context.type)` (vector too long)\n this function has no effect and returns `false`, otherwise it returns `true`.\n"]
+    #[doc = " Resizes the vector to contain `new_size` elements.\n\n If `new_size > CSTL_vector_max_size(type)` (vector too long)\n this function has no effect and returns `false`, otherwise it returns `true`.\n"]
+    pub fn CSTL_vector_resize(
+        instance: CSTL_VectorRef,
+        type_: CSTL_Type,
+        copy: CSTL_CopyTypeCRef,
+        new_size: usize,
+        value: *const ::std::os::raw::c_void,
+        alloc: *mut CSTL_Alloc,
+    ) -> bool;
+}
+unsafe extern "C" {
+    #[doc = " Truncates the vector to contain `new_size` elements, removing any excess.\n\n Has no effect if `new_size >= CSTL_vector_size(instance, type)`.\n\n If `new_size > CSTL_vector_max_size(type)` (vector too long)\n this function has no effect and returns `false`, otherwise it returns `true`.\n"]
+    pub fn CSTL_vector_truncate(
+        instance: CSTL_VectorRef,
+        type_: CSTL_Type,
+        drop: CSTL_DropTypeCRef,
+        new_size: usize,
+    );
+}
+unsafe extern "C" {
+    #[doc = " If `new_capacity > CSTL_vector_capacity(instance, type)`, reallocates and expands\n the vector storage.\n\n If `new_capacity` exceeds `CSTL_vector_max_size(type)` (vector too long)\n this function has no effect and returns `false`, otherwise it returns `true`.\n"]
     pub fn CSTL_vector_reserve(
-        context: CSTL_VectorCtx,
+        instance: CSTL_VectorRef,
+        type_: CSTL_Type,
+        move_: CSTL_MoveTypeCRef,
         new_capacity: usize,
         alloc: *mut CSTL_Alloc,
     ) -> bool;
 }
 unsafe extern "C" {
-    #[doc = " Request removal of unused capacity.\n"]
-    pub fn CSTL_vector_shrink_to_fit(context: CSTL_VectorCtx, alloc: *mut CSTL_Alloc);
+    #[doc = " Request removal of unused capacity.\n\n If a reallocation occurs and fails returns `false`, otherwise\n always returns `true`.\n"]
+    pub fn CSTL_vector_shrink_to_fit(
+        instance: CSTL_VectorRef,
+        type_: CSTL_Type,
+        move_: CSTL_MoveTypeCRef,
+        alloc: *mut CSTL_Alloc,
+    ) -> bool;
 }
 unsafe extern "C" {
     #[doc = " Erase all elements from the vector without affecting capacity.\n"]
-    pub fn CSTL_vector_clear(context: CSTL_VectorCtx);
+    pub fn CSTL_vector_clear(instance: CSTL_VectorRef, drop: CSTL_DropTypeCRef);
 }
 unsafe extern "C" {
-    #[doc = " Inserts `count` copies of `value` into the vector before `where` and returns\n an iterator to the first newly inserted element.\n\n If `count > CSTL_vector_max_size(context.type) - CSTL_vector_size(context)` (vector too long)\n this function has no effect and returns `CSTL_vector_end(context)`.\n"]
-    pub fn CSTL_vector_insert(
-        context: CSTL_VectorCtx,
+    #[doc = " Appends a copy of `value` to the end of the vector.\n\n If `CSTL_vector_size(instance, type) == CSTL_vector_max_size(type)` (vector too long)\n this function has no effect and returns `false`, otherwise it returns `true`.\n"]
+    pub fn CSTL_vector_copy_push_back(
+        instance: CSTL_VectorRef,
+        type_: CSTL_Type,
+        copy: CSTL_CopyTypeCRef,
+        value: *const ::std::os::raw::c_void,
+        alloc: *mut CSTL_Alloc,
+    ) -> bool;
+}
+unsafe extern "C" {
+    #[doc = " Appends `value` to the end of the vector by moving it.\n\n If `CSTL_vector_size(instance, type) == CSTL_vector_max_size(type)` (vector too long)\n this function has no effect and returns `false`, otherwise it returns `true`.\n"]
+    pub fn CSTL_vector_move_push_back(
+        instance: CSTL_VectorRef,
+        type_: CSTL_Type,
+        move_: CSTL_MoveTypeCRef,
+        value: *mut ::std::os::raw::c_void,
+        alloc: *mut CSTL_Alloc,
+    ) -> bool;
+}
+unsafe extern "C" {
+    #[doc = " Removes the last element from the vector.\n\n If `CSTL_vector_empty(instance) == true` the behavior is undefined.\n"]
+    pub fn CSTL_vector_pop_back(
+        instance: CSTL_VectorRef,
+        type_: CSTL_Type,
+        drop: CSTL_DropTypeCRef,
+    );
+}
+unsafe extern "C" {
+    #[doc = " Inserts a copy of `value` into the vector before `where` and returns\n an iterator to the newly inserted element.\n\n If `CSTL_vector_size(instance, ...) == CSTL_vector_max_size(...)` (vector too long)\n this function has no effect and returns `CSTL_vector_end(instance, ...)`.\n"]
+    pub fn CSTL_vector_copy_insert(
+        instance: CSTL_VectorRef,
+        copy: CSTL_CopyTypeCRef,
+        where_: CSTL_VectorIter,
+        value: *const ::std::os::raw::c_void,
+        alloc: *mut CSTL_Alloc,
+    ) -> CSTL_VectorIter;
+}
+unsafe extern "C" {
+    #[doc = " Inserts `value` into the vector before `where` by moving it and returns\n an iterator to the newly inserted element.\n\n If `CSTL_vector_size(instance, ...) == CSTL_vector_max_size(...)` (vector too long)\n this function has no effect and returns `CSTL_vector_end(instance, ...)`.\n"]
+    pub fn CSTL_vector_move_insert(
+        instance: CSTL_VectorRef,
+        move_: CSTL_MoveTypeCRef,
+        where_: CSTL_VectorIter,
+        value: *mut ::std::os::raw::c_void,
+        alloc: *mut CSTL_Alloc,
+    ) -> CSTL_VectorIter;
+}
+unsafe extern "C" {
+    #[doc = " Inserts a copy of the range `[range_first, range_last)` into the vector before `where` and returns\n an iterator to the newly inserted elements.\n\n Exceeding the maximum possible vector size has the same effect as `CSTL_vector_copy_insert`,\n returning `CSTL_vector_end(instance, ...)`.\n"]
+    pub fn CSTL_vector_copy_insert_range(
+        instance: CSTL_VectorRef,
+        copy: CSTL_CopyTypeCRef,
+        where_: CSTL_VectorIter,
+        range_first: *const ::std::os::raw::c_void,
+        range_last: *const ::std::os::raw::c_void,
+        alloc: *mut CSTL_Alloc,
+    ) -> CSTL_VectorIter;
+}
+unsafe extern "C" {
+    #[doc = " Inserts the range `[range_first, range_last)` into the vector before `where` by moving it and returns\n an iterator to the newly inserted elements.\n\n Exceeding the maximum possible vector size has the same effect as `CSTL_vector_move_insert`,\n returning `CSTL_vector_end(instance, ...)`.\n"]
+    pub fn CSTL_vector_move_insert_range(
+        instance: CSTL_VectorRef,
+        move_: CSTL_MoveTypeCRef,
+        where_: CSTL_VectorIter,
+        range_first: *mut ::std::os::raw::c_void,
+        range_last: *mut ::std::os::raw::c_void,
+        alloc: *mut CSTL_Alloc,
+    ) -> CSTL_VectorIter;
+}
+unsafe extern "C" {
+    #[doc = " Inserts `count` copies of `value` into the vector before `where` and returns\n an iterator to the first newly inserted element.\n\n If `count > CSTL_vector_max_size(...) - CSTL_vector_size(instance, ...)` (vector too long)\n this function has no effect and returns `CSTL_vector_end(instance, ...)`.\n"]
+    pub fn CSTL_vector_insert_n(
+        instance: CSTL_VectorRef,
+        copy: CSTL_CopyTypeCRef,
         where_: CSTL_VectorIter,
         count: usize,
         value: *const ::std::os::raw::c_void,
@@ -525,79 +541,21 @@ unsafe extern "C" {
     ) -> CSTL_VectorIter;
 }
 unsafe extern "C" {
-    #[doc = " Inserts a copy of `value` into the vector before `where` and returns\n an iterator to the newly inserted element.\n\n If `CSTL_vector_size(context) == CSTL_vector_max_size(context.type)` (vector too long)\n this function has no effect and returns `CSTL_vector_end(context)`.\n"]
-    pub fn CSTL_vector_emplace(
-        context: CSTL_VectorCtx,
-        where_: CSTL_VectorIter,
-        value: *mut ::std::os::raw::c_void,
-        alloc: *mut CSTL_Alloc,
-    ) -> CSTL_VectorIter;
-}
-unsafe extern "C" {
-    #[doc = " Inserts a copy of `value` into the vector before `where` and returns\n an iterator to the newly inserted element.\n\n If `CSTL_vector_size(context) == CSTL_vector_max_size(context.type)` (vector too long)\n this function has no effect and returns `CSTL_vector_end(context)`.\n"]
-    pub fn CSTL_vector_emplace_const(
-        context: CSTL_VectorCtx,
-        where_: CSTL_VectorIter,
-        value: *const ::std::os::raw::c_void,
-        alloc: *mut CSTL_Alloc,
-    ) -> CSTL_VectorIter;
-}
-unsafe extern "C" {
     #[doc = " Removes the element at `where` and returns an iterator following the\n removed element.\n\n The iterator `where` must be valid and dereferenceable.\n"]
-    pub fn CSTL_vector_erase(context: CSTL_VectorCtx, where_: CSTL_VectorIter) -> CSTL_VectorIter;
+    pub fn CSTL_vector_erase(
+        instance: CSTL_VectorRef,
+        move_: CSTL_MoveTypeCRef,
+        where_: CSTL_VectorIter,
+    ) -> CSTL_VectorIter;
 }
 unsafe extern "C" {
     #[doc = " Removes elements in the range `[first, last)` and returns an iterator following the\n removed elements.\n\n If `first == last`, no operation is performed.\n"]
     pub fn CSTL_vector_erase_range(
-        context: CSTL_VectorCtx,
+        instance: CSTL_VectorRef,
+        move_: CSTL_MoveTypeCRef,
         first: CSTL_VectorIter,
         last: CSTL_VectorIter,
     ) -> CSTL_VectorIter;
-}
-unsafe extern "C" {
-    #[doc = " Appends a copy of `value` to the end of the vector and returns\n an iterator to the newly inserted element.\n\n If `CSTL_vector_size(context) == CSTL_vector_max_size(context.type)` (vector too long)\n this function has no effect and returns `CSTL_vector_end(instance, type)`.\n"]
-    pub fn CSTL_vector_emplace_back(
-        context: CSTL_VectorCtx,
-        value: *mut ::std::os::raw::c_void,
-        alloc: *mut CSTL_Alloc,
-    ) -> CSTL_VectorIter;
-}
-unsafe extern "C" {
-    #[doc = " Appends a copy of `value` to the end of the vector and returns\n an iterator to the newly inserted element.\n\n If `CSTL_vector_size(context) == CSTL_vector_max_size(context.type)` (vector too long)\n this function has no effect and returns `CSTL_vector_end(instance, type)`.\n"]
-    pub fn CSTL_vector_emplace_back_const(
-        context: CSTL_VectorCtx,
-        value: *const ::std::os::raw::c_void,
-        alloc: *mut CSTL_Alloc,
-    ) -> CSTL_VectorIter;
-}
-unsafe extern "C" {
-    #[doc = " Appends a copy of `value` to the end of the vector.\n\n If `CSTL_vector_size(context) == CSTL_vector_max_size(context.type)` (vector too long)\n this function has no effect and returns `false`, otherwise it returns `true`.\n"]
-    pub fn CSTL_vector_push_back(
-        context: CSTL_VectorCtx,
-        value: *mut ::std::os::raw::c_void,
-        alloc: *mut CSTL_Alloc,
-    ) -> bool;
-}
-unsafe extern "C" {
-    #[doc = " Appends a copy of `value` to the end of the vector.\n\n If `CSTL_vector_size(context) == CSTL_vector_max_size(context.type)` (vector too long)\n this function has no effect and returns `false`, otherwise it returns `true`.\n"]
-    pub fn CSTL_vector_push_back_const(
-        context: CSTL_VectorCtx,
-        value: *const ::std::os::raw::c_void,
-        alloc: *mut CSTL_Alloc,
-    ) -> bool;
-}
-unsafe extern "C" {
-    #[doc = " Removes the last element from the vector.\n\n If `CSTL_vector_empty(context) == true` the behavior is undefined.\n"]
-    pub fn CSTL_vector_pop_back(context: CSTL_VectorCtx);
-}
-unsafe extern "C" {
-    #[doc = " Resizes the vector to contain `new_size` elements.\n\n If `new_size > CSTL_vector_max_size(context.type)` (vector too long)\n this function has no effect and returns `false`, otherwise it returns `true`.\n"]
-    pub fn CSTL_vector_resize(
-        context: CSTL_VectorCtx,
-        new_size: usize,
-        value: *const ::std::os::raw::c_void,
-        alloc: *mut CSTL_Alloc,
-    ) -> bool;
 }
 #[doc = " STL ABI `std::basic_string` layout.\n\n Does not include the allocator, which nonetheless is a part of the `std::basic_string`\n structure! You are responsible for including it, since it can take on any form.\n\n Do not manipulate the members directly, use the associated functions!\n"]
 #[repr(C)]
