@@ -562,26 +562,24 @@ unsafe extern "C" {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct CSTL_StringVal {
-    pub bx: CSTL_StringVal__bindgen_ty_1,
+    pub bx: CSTL_StringUnion,
     pub size: usize,
     pub res: usize,
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub union CSTL_StringVal__bindgen_ty_1 {
+pub union CSTL_StringUnion {
     pub buf: [::std::os::raw::c_char; 16usize],
     pub ptr: *mut ::std::os::raw::c_char,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of CSTL_StringVal__bindgen_ty_1"]
-        [::std::mem::size_of::<CSTL_StringVal__bindgen_ty_1>() - 16usize];
-    ["Alignment of CSTL_StringVal__bindgen_ty_1"]
-        [::std::mem::align_of::<CSTL_StringVal__bindgen_ty_1>() - 8usize];
-    ["Offset of field: CSTL_StringVal__bindgen_ty_1::buf"]
-        [::std::mem::offset_of!(CSTL_StringVal__bindgen_ty_1, buf) - 0usize];
-    ["Offset of field: CSTL_StringVal__bindgen_ty_1::ptr"]
-        [::std::mem::offset_of!(CSTL_StringVal__bindgen_ty_1, ptr) - 0usize];
+    ["Size of CSTL_StringUnion"][::std::mem::size_of::<CSTL_StringUnion>() - 16usize];
+    ["Alignment of CSTL_StringUnion"][::std::mem::align_of::<CSTL_StringUnion>() - 8usize];
+    ["Offset of field: CSTL_StringUnion::buf"]
+        [::std::mem::offset_of!(CSTL_StringUnion, buf) - 0usize];
+    ["Offset of field: CSTL_StringUnion::ptr"]
+        [::std::mem::offset_of!(CSTL_StringUnion, ptr) - 0usize];
 };
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
@@ -1169,26 +1167,24 @@ unsafe extern "C" {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct CSTL_WideStringVal {
-    pub bx: CSTL_WideStringVal__bindgen_ty_1,
+    pub bx: CSTL_WideStringUnion,
     pub size: usize,
     pub res: usize,
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub union CSTL_WideStringVal__bindgen_ty_1 {
+pub union CSTL_WideStringUnion {
     pub buf: [wchar_t; 8usize],
     pub ptr: *mut wchar_t,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of CSTL_WideStringVal__bindgen_ty_1"]
-        [::std::mem::size_of::<CSTL_WideStringVal__bindgen_ty_1>() - 16usize];
-    ["Alignment of CSTL_WideStringVal__bindgen_ty_1"]
-        [::std::mem::align_of::<CSTL_WideStringVal__bindgen_ty_1>() - 8usize];
-    ["Offset of field: CSTL_WideStringVal__bindgen_ty_1::buf"]
-        [::std::mem::offset_of!(CSTL_WideStringVal__bindgen_ty_1, buf) - 0usize];
-    ["Offset of field: CSTL_WideStringVal__bindgen_ty_1::ptr"]
-        [::std::mem::offset_of!(CSTL_WideStringVal__bindgen_ty_1, ptr) - 0usize];
+    ["Size of CSTL_WideStringUnion"][::std::mem::size_of::<CSTL_WideStringUnion>() - 16usize];
+    ["Alignment of CSTL_WideStringUnion"][::std::mem::align_of::<CSTL_WideStringUnion>() - 8usize];
+    ["Offset of field: CSTL_WideStringUnion::buf"]
+        [::std::mem::offset_of!(CSTL_WideStringUnion, buf) - 0usize];
+    ["Offset of field: CSTL_WideStringUnion::ptr"]
+        [::std::mem::offset_of!(CSTL_WideStringUnion, ptr) - 0usize];
 };
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
@@ -1770,26 +1766,24 @@ pub type char8_t = ::std::os::raw::c_uchar;
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct CSTL_UTF8StringVal {
-    pub bx: CSTL_UTF8StringVal__bindgen_ty_1,
+    pub bx: CSTL_UTF8StringUnion,
     pub size: usize,
     pub res: usize,
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub union CSTL_UTF8StringVal__bindgen_ty_1 {
+pub union CSTL_UTF8StringUnion {
     pub buf: [char8_t; 16usize],
     pub ptr: *mut char8_t,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of CSTL_UTF8StringVal__bindgen_ty_1"]
-        [::std::mem::size_of::<CSTL_UTF8StringVal__bindgen_ty_1>() - 16usize];
-    ["Alignment of CSTL_UTF8StringVal__bindgen_ty_1"]
-        [::std::mem::align_of::<CSTL_UTF8StringVal__bindgen_ty_1>() - 8usize];
-    ["Offset of field: CSTL_UTF8StringVal__bindgen_ty_1::buf"]
-        [::std::mem::offset_of!(CSTL_UTF8StringVal__bindgen_ty_1, buf) - 0usize];
-    ["Offset of field: CSTL_UTF8StringVal__bindgen_ty_1::ptr"]
-        [::std::mem::offset_of!(CSTL_UTF8StringVal__bindgen_ty_1, ptr) - 0usize];
+    ["Size of CSTL_UTF8StringUnion"][::std::mem::size_of::<CSTL_UTF8StringUnion>() - 16usize];
+    ["Alignment of CSTL_UTF8StringUnion"][::std::mem::align_of::<CSTL_UTF8StringUnion>() - 8usize];
+    ["Offset of field: CSTL_UTF8StringUnion::buf"]
+        [::std::mem::offset_of!(CSTL_UTF8StringUnion, buf) - 0usize];
+    ["Offset of field: CSTL_UTF8StringUnion::ptr"]
+        [::std::mem::offset_of!(CSTL_UTF8StringUnion, ptr) - 0usize];
 };
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
@@ -2374,26 +2368,25 @@ unsafe extern "C" {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct CSTL_UTF16StringVal {
-    pub bx: CSTL_UTF16StringVal__bindgen_ty_1,
+    pub bx: CSTL_UTF16StringUnion,
     pub size: usize,
     pub res: usize,
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub union CSTL_UTF16StringVal__bindgen_ty_1 {
+pub union CSTL_UTF16StringUnion {
     pub buf: [char16_t; 8usize],
     pub ptr: *mut char16_t,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of CSTL_UTF16StringVal__bindgen_ty_1"]
-        [::std::mem::size_of::<CSTL_UTF16StringVal__bindgen_ty_1>() - 16usize];
-    ["Alignment of CSTL_UTF16StringVal__bindgen_ty_1"]
-        [::std::mem::align_of::<CSTL_UTF16StringVal__bindgen_ty_1>() - 8usize];
-    ["Offset of field: CSTL_UTF16StringVal__bindgen_ty_1::buf"]
-        [::std::mem::offset_of!(CSTL_UTF16StringVal__bindgen_ty_1, buf) - 0usize];
-    ["Offset of field: CSTL_UTF16StringVal__bindgen_ty_1::ptr"]
-        [::std::mem::offset_of!(CSTL_UTF16StringVal__bindgen_ty_1, ptr) - 0usize];
+    ["Size of CSTL_UTF16StringUnion"][::std::mem::size_of::<CSTL_UTF16StringUnion>() - 16usize];
+    ["Alignment of CSTL_UTF16StringUnion"]
+        [::std::mem::align_of::<CSTL_UTF16StringUnion>() - 8usize];
+    ["Offset of field: CSTL_UTF16StringUnion::buf"]
+        [::std::mem::offset_of!(CSTL_UTF16StringUnion, buf) - 0usize];
+    ["Offset of field: CSTL_UTF16StringUnion::ptr"]
+        [::std::mem::offset_of!(CSTL_UTF16StringUnion, ptr) - 0usize];
 };
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
@@ -2984,26 +2977,25 @@ unsafe extern "C" {
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct CSTL_UTF32StringVal {
-    pub bx: CSTL_UTF32StringVal__bindgen_ty_1,
+    pub bx: CSTL_UTF32StringUnion,
     pub size: usize,
     pub res: usize,
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub union CSTL_UTF32StringVal__bindgen_ty_1 {
+pub union CSTL_UTF32StringUnion {
     pub buf: [char32_t; 4usize],
     pub ptr: *mut char32_t,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of CSTL_UTF32StringVal__bindgen_ty_1"]
-        [::std::mem::size_of::<CSTL_UTF32StringVal__bindgen_ty_1>() - 16usize];
-    ["Alignment of CSTL_UTF32StringVal__bindgen_ty_1"]
-        [::std::mem::align_of::<CSTL_UTF32StringVal__bindgen_ty_1>() - 8usize];
-    ["Offset of field: CSTL_UTF32StringVal__bindgen_ty_1::buf"]
-        [::std::mem::offset_of!(CSTL_UTF32StringVal__bindgen_ty_1, buf) - 0usize];
-    ["Offset of field: CSTL_UTF32StringVal__bindgen_ty_1::ptr"]
-        [::std::mem::offset_of!(CSTL_UTF32StringVal__bindgen_ty_1, ptr) - 0usize];
+    ["Size of CSTL_UTF32StringUnion"][::std::mem::size_of::<CSTL_UTF32StringUnion>() - 16usize];
+    ["Alignment of CSTL_UTF32StringUnion"]
+        [::std::mem::align_of::<CSTL_UTF32StringUnion>() - 8usize];
+    ["Offset of field: CSTL_UTF32StringUnion::buf"]
+        [::std::mem::offset_of!(CSTL_UTF32StringUnion, buf) - 0usize];
+    ["Offset of field: CSTL_UTF32StringUnion::ptr"]
+        [::std::mem::offset_of!(CSTL_UTF32StringUnion, ptr) - 0usize];
 };
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
