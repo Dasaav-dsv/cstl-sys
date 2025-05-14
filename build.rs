@@ -16,7 +16,6 @@ fn main() {
             "CSTL/lib/xstring.h",
         ])
         .allowlist_item("CSTL_\\w*")
-        .no_copy("CSTL_\\w*Val")
         .no_debug("CSTL_\\w*Val")
         .generate_cstr(true)
         .prepend_enum_name(false)
