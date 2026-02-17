@@ -11,3 +11,6 @@ links = "CSTL"
 
 [build-dependencies]
 cc = "1.2"
+
+[package.metadata.docs.rs]
+rustc-args = ["--cfg", "docsrs"]
